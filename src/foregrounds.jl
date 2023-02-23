@@ -48,6 +48,29 @@ function CIBClustering(pow_at_3000, α, β, ν1, ν2, z1, z2, SPT3G_windows_lmax
         return Dl_cib_clustering
 end
 
+function tSZCIBCorrelation(tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β, z1, z2,
+    CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT3G_windows_lmax, T_CIB, ν0_CIB, ν0_tSZ)
+
+        # Calculate CIB components
+        Dl_cib_clustering_11 = CIBClustering(
+        CIB_pow_at_3000, α, β, CIB_ν1, CIB_ν1, z1, z1, SPT3G_windows_lmax, T_CIB, ν0_CIB)
+        Dl_cib_clustering_22 = CIBClustering(
+            CIB_pow_at_3000, α, β, CIB_ν2, CIB_ν2, z2, z2, SPT3G_windows_lmax, T_CIB, ν0_CIB)
+
+        # Calculate the tSZ components
+        Dl_tSZ_11 = tSZ(tSZ_template, tsz_pow_at_3000, tSZ_ν1, tSZ_ν1, ν0_tSZ)
+        Dl_tSZ_22 = tSZ(tSZ_template, tsz_pow_at_3000, tSZ_ν2, tSZ_ν2, ν0_tSZ)
+
+        # Calculate tSZ-CIB correlation
+        # Sign defined such that a positive xi corresponds to a reduction at 150GHz
+        #with np.errstate(invalid="ignore"):
+        Dl_tSZ_CIB_corr = ( -1 * ξ_tsz_CIB
+                .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
+                   sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))
+
+        return Dl_tSZ_CIB_corr
+end
+
 function tSZFrequencyScaling(ν, ν0, T)
     x0 = Ghz_Kelvin * ν0 / T
     x = Ghz_Kelvin * ν / T
