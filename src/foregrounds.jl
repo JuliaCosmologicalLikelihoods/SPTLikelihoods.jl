@@ -14,3 +14,24 @@ function dBdT(ν, ν0, T)
 
     return dBdT / dBdT0
 end
+
+function tSZFrequencyScaling(ν, ν0, T)
+    x0 = Ghz_Kelvin * ν0 / T
+    x = Ghz_Kelvin * ν / T
+
+    tSZfac0 = x0 * (exp(x0) + 1) / (exp(x0) - 1) - 4
+    tSZfac = x * (exp(x) + 1) / (exp(x) - 1) - 4
+
+    return tSZfac / tSZfac0
+end
+
+function tSZ(tSZ_template, pow_at_3000, ν1, ν2, ν0_tSZ)
+
+    # Calculate tSZ power
+    Dl_tSZ = tSZ_template .* (pow_at_3000 *
+    tSZFrequencyScaling(ν1, ν0_tSZ, T_CMB) *
+    tSZFrequencyScaling(ν2, ν0_tSZ, T_CMB))
+    # Frequency scaling
+
+    return Dl_tSZ
+end
