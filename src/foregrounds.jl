@@ -15,6 +15,11 @@ function dBdT(ν, ν0, T)
     return dBdT / dBdT0
 end
 
+function DustFreqScaling(β, Tdust, ν0, ν_eff)
+    fdust = (ν_eff / ν0) ^ β * Bnu(ν_eff, ν0, Tdust) / dBdT(ν_eff, ν0, T_CMB)
+    return fdust
+end
+
 function tSZFrequencyScaling(ν, ν0, T)
     x0 = Ghz_Kelvin * ν0 / T
     x = Ghz_Kelvin * ν / T
