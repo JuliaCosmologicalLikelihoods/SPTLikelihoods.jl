@@ -3,7 +3,6 @@ function Bnu(ν, ν0, T)
     return (ν / ν0)^3 * (exp(Ghz_Kelvin * ν0 / T) - 1.0) / (exp(Ghz_Kelvin * ν / T) - 1.0)
 end
 
-
 # Derivative of Planck function normalised to 1 at nu0
 function dBdT(ν, ν0, T)
     x0 = Ghz_Kelvin * ν0 / T
@@ -16,13 +15,11 @@ function dBdT(ν, ν0, T)
 end
 
 function DustFreqScaling(β, Tdust, ν0, ν_eff)
-    fdust = (ν_eff / ν0) ^ β * Bnu(ν_eff, ν0, Tdust) / dBdT(ν_eff, ν0, T_CMB)
-    return fdust
+    return (ν_eff / ν0) ^ β * Bnu(ν_eff, ν0, Tdust) / dBdT(ν_eff, ν0, T_CMB)
 end
 
 function GalacticDust(pow_at_80, α, β, ν1, ν2, SPT3G_windows_lmax, T_galdust, ν_0_galdust)
 
-        # Grab ells helper (1-3200)
         ells = Array(1:SPT3G_windows_lmax)
 
         # Calculate and add galactic dust power
@@ -37,7 +34,6 @@ end
 function CIBClustering(pow_at_3000, α, β, ν1, ν2, z1, z2, SPT3G_windows_lmax, T_CIB,
     ν0_CIB)
 
-        # Grab ells helper (1-3200)
         ells = Array(1:SPT3G_windows_lmax)
 
         # Calculate and add polarised galactic dust power
@@ -48,8 +44,8 @@ function CIBClustering(pow_at_3000, α, β, ν1, ν2, z1, z2, SPT3G_windows_lmax
         return Dl_cib_clustering
 end
 
-function tSZCIBCorrelation(tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β, z1, z2,
-    CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT3G_windows_lmax, T_CIB, ν0_CIB, ν0_tSZ)
+function tSZCIBCorrelation(tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
+    z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT3G_windows_lmax, T_CIB, ν0_CIB, ν0_tSZ)
 
         # Calculate CIB components
         Dl_cib_clustering_11 = CIBClustering(
@@ -63,7 +59,7 @@ function tSZCIBCorrelation(tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at
 
         # Calculate tSZ-CIB correlation
         # Sign defined such that a positive xi corresponds to a reduction at 150GHz
-        #with np.errstate(invalid="ignore"):
+        #TODO: maybe use NaNMath.jl to deal with possible NaNs?
         Dl_tSZ_CIB_corr = ( -1 * ξ_tsz_CIB
                 .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
                    sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))
@@ -91,3 +87,11 @@ function tSZ(tSZ_template, pow_at_3000, ν1, ν2, ν0_tSZ)
 
     return Dl_tSZ
 end
+
+function _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
+    ells = Array(1:SPT3G_windows_lmax)
+
+    Cℓ_derivative = Dℓ_theory * 2 * π ./ (ells .* (ells .+ 1))
+    Cℓ_derivative[2:end-1] .= 0.5 .* (Cℓ_derivative[3:end]-Cℓ_derivative[1:end-2])
+    Cℓ_derivative[1] = Cℓ_derivative[2]
+    Cℓ_derivative[end] = Cℓ_derivative[end-1]
