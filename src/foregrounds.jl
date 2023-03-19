@@ -116,3 +116,13 @@ function apply_abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
 
     return aberration_correction
 end
+
+function apply_calibration(cal1, cal2, cal3, cal4)
+    return 0.5 * (cal1 * cal2 + cal3 * cal4)
+end
+
+function poisson_power(SPT3G_windows_lmax, pow_at_3000)
+    ells = Array(1:SPT3G_windows_lmax)
+
+    return ells .* ells .* (pow_at_3000 / 3000 ^2)
+end
