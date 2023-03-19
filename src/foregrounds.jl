@@ -96,6 +96,9 @@ function _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
     Cℓ_derivative[1] = Cℓ_derivative[2]
     Cℓ_derivative[end] = Cℓ_derivative[end-1]
 
+    return Cℓ_derivative
+end
+
 function apply_SuperSampleLensing(SPT3G_windows_lmax, κ, Dℓ_theory)
     ells = Array(1:SPT3G_windows_lmax)
 
