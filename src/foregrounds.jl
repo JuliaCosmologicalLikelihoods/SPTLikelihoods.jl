@@ -106,3 +106,13 @@ function apply_SuperSampleLensing(SPT3G_windows_lmax, κ, Dℓ_theory)
     ssl_correction .*= (-κ)
     return ssl_correction
 end
+
+function apply_abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
+    ells = Array(1:SPT3G_windows_lmax)
+
+    Cℓ_derivative = _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
+    aberration_correction = -ab_coeff .* Cℓ_derivative .* ells
+    aberration_correction .*= ells .* (ells .+ 1) ./ (2π)
+
+    return aberration_correction
+end
