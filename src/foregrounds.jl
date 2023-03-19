@@ -95,3 +95,14 @@ function _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
     Cℓ_derivative[2:end-1] .= 0.5 .* (Cℓ_derivative[3:end]-Cℓ_derivative[1:end-2])
     Cℓ_derivative[1] = Cℓ_derivative[2]
     Cℓ_derivative[end] = Cℓ_derivative[end-1]
+
+function apply_SuperSampleLensing(SPT3G_windows_lmax, κ, Dℓ_theory)
+    ells = Array(1:SPT3G_windows_lmax)
+
+    Cℓ_derivative = _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
+    ssl_correction = ells .* Cℓ_derivative  .* ells .* (ells .+ 1) ./ (2π)
+    #maybe better to have a get_Dl_derivative?
+    ssl_correction .+= 2 .* Dℓ_theory
+    ssl_correction .*= (-κ)
+    return ssl_correction
+end
