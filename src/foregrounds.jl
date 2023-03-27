@@ -131,6 +131,11 @@ function apply_SuperSampleLensing(SPT3G_windows_lmax, κ, Dℓ_theory)
     return ssl_correction
 end
 
+function apply_SuperSampleLensing(κ, Dℓ_theory, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
+
+    return apply_SuperSampleLensing(SPT_fg.ℓ_max, κ, Dℓ_theory)
+end
+
 function apply_abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
     ells = Array(1:SPT3G_windows_lmax)
 
