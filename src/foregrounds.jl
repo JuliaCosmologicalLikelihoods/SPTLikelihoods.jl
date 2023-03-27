@@ -146,6 +146,11 @@ function apply_abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
     return aberration_correction
 end
 
+function apply_abberation_correction(ab_coeff, Dℓ_theory, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
+
+    return apply_abberation_correction(SPT_fg.ℓ_max, ab_coeff, Dℓ_theory)
+end
+
 function apply_calibration(cal1, cal2, cal3, cal4)
     return 0.5 * (cal1 * cal2 + cal3 * cal4)
 end
