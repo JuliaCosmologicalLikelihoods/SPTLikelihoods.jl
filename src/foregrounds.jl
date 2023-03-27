@@ -1,3 +1,13 @@
+Base.@kwdef struct SPT3G_2018_TTTEEE_Foregrounds
+    ℓ_min::Integer=1
+    ℓ_max::Integer=3200
+    galdust_ν0=150
+    galdust_T=19.6
+    CIB_ν0 = 150.
+    CIB_T = 25.
+    tSZ_ν0 = 143
+end
+
 #Planck distribution
 function Bnu(ν, ν0, T)
     return (ν / ν0)^3 * (exp(Ghz_Kelvin * ν0 / T) - 1.0) / (exp(Ghz_Kelvin * ν / T) - 1.0)
@@ -128,4 +138,8 @@ function poisson_power(SPT3G_windows_lmax, pow_at_3000)
     ells = Array(1:SPT3G_windows_lmax)
 
     return ells .* ells .* (pow_at_3000 / 3000 ^2)
+end
+
+function poisson_power(pow_at_3000, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
+    return poisson_power(SPT_fg.ℓ_max, pow_at_3000)
 end

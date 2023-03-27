@@ -1,4 +1,5 @@
 module SPTLikelihoods
+import Base.@kwdef
 
 include("foregrounds.jl")
 
