@@ -6,6 +6,8 @@ Base.@kwdef struct SPT3G_2018_TTTEEE_Foregrounds
     CIB_ν0 = 150.
     CIB_T = 25.
     tSZ_ν0 = 143
+    tSZ_template::Array
+    kSZ_template::Array
 end
 
 #Planck distribution
@@ -107,6 +109,19 @@ function tSZ(tSZ_template, pow_at_3000, ν1, ν2, ν0_tSZ)
     # Frequency scaling
 
     return Dl_tSZ
+end
+
+function tSZ(pow_at_3000, ν1, ν2, ν0_tSZ, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
+
+    return tSZ(SPT_fg.tSZ_template, pow_at_3000, ν1, ν2, ν0_tSZ)
+end
+
+function kSZ(kSZ_template, pow_at_3000)
+    return pow_at_3000 .* kSZ_template
+end
+
+function kSZ(pow_at_3000, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
+    return kSZ(SPT_fg.kSZ_template, pow_at_3000)
 end
 
 function _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
