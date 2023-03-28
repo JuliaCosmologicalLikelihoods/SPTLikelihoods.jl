@@ -90,6 +90,15 @@ function tSZCIBCorrelation(tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at
         return Dl_tSZ_CIB_corr
 end
 
+function tSZCIBCorrelation(ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
+    z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
+
+    return tSZCIBCorrelation(SPT_fg.tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000,
+    CIB_pow_at_3000, α, β, z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT_fg.ℓ_max,
+    SPT_fg.CIB_T, SPT_fg.CIB_ν0, SPT_fg.tSZ_ν0)
+end
+
+
 function tSZFrequencyScaling(ν, ν0, T)
     x0 = Ghz_Kelvin * ν0 / T
     x = Ghz_Kelvin * ν / T
