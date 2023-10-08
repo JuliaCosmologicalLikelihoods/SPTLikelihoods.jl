@@ -28,7 +28,7 @@ function DustFreqScaling(β, Tdust, ν0, ν_eff)
     return (ν_eff / ν0) ^ β * Bnu(ν_eff, ν0, Tdust) / dBdT(ν_eff, ν0, T_CMB)
 end
 
-function GalacticDust(A_80, α, β, ν1, ν2, SPT3G_windows_lmax, T_galdust, ν_0_galdust)
+function GalacticDust(A_80, α, β, ν1, ν2, SPT3G_windows_lmax)
 
     ells = Array{Float64}(1:SPT3G_windows_lmax)
     #TODO optimization opportunity:  the α exponent has a small dynamical range in the
@@ -36,37 +36,36 @@ function GalacticDust(A_80, α, β, ν1, ν2, SPT3G_windows_lmax, T_galdust, ν_
 
     # Calculate and add galactic dust power
     Dl_galdust =  (ells ./ 80) .^ (α + 2.0) .* (A_80 *
-    DustFreqScaling(β, T_galdust, ν_0_galdust, ν1) *
-    DustFreqScaling(β, T_galdust, ν_0_galdust, ν2))
+    DustFreqScaling(β, galdust_T, galdust_ν0, ν1) *
+    DustFreqScaling(β, galdust_T, galdust_ν0, ν2))
 
     return Dl_galdust
 end
 
-function CIBClustering(pow_at_3000, α, β, ν1, ν2, z1, z2, SPT3G_windows_lmax, T_CIB,
-    ν0_CIB)
+function CIBClustering(pow_at_3000, α, β, ν1, ν2, z1, z2, SPT3G_windows_lmax)
 
         ells = Array{Float64}(1:SPT3G_windows_lmax)
 
         # Calculate and add polarised galactic dust power
         Dl_cib_clustering =  (ells ./ 3000) .^ α .* (pow_at_3000 *
-        DustFreqScaling(β, T_CIB, ν0_CIB, ν1) *
-        DustFreqScaling(β, T_CIB, ν0_CIB, ν2) * sqrt(z1 * z2))
+        DustFreqScaling(β, CIB_T, CIB_ν0, ν1) *
+        DustFreqScaling(β, CIB_T, CIB_ν0ù, ν2) * sqrt(z1 * z2))
 
         return Dl_cib_clustering
 end
 
 function tSZCIBCorrelation(ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
-    z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT3G_windows_lmax, T_CIB, ν0_CIB, ν0_tSZ)
+    z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT3G_windows_lmax)
 
         # Calculate CIB components
         Dl_cib_clustering_11 = CIBClustering(
-        CIB_pow_at_3000, α, β, CIB_ν1, CIB_ν1, z1, z1, SPT3G_windows_lmax, T_CIB, ν0_CIB)
+        CIB_pow_at_3000, α, β, CIB_ν1, CIB_ν1, z1, z1, SPT3G_windows_lmax)
         Dl_cib_clustering_22 = CIBClustering(
-            CIB_pow_at_3000, α, β, CIB_ν2, CIB_ν2, z2, z2, SPT3G_windows_lmax, T_CIB, ν0_CIB)
+            CIB_pow_at_3000, α, β, CIB_ν2, CIB_ν2, z2, z2, SPT3G_windows_lmax)
 
         # Calculate the tSZ components
-        Dl_tSZ_11 = tSZ(tsz_pow_at_3000, tSZ_ν1, tSZ_ν1, ν0_tSZ)
-        Dl_tSZ_22 = tSZ(tsz_pow_at_3000, tSZ_ν2, tSZ_ν2, ν0_tSZ)
+        Dl_tSZ_11 = tSZ(tsz_pow_at_3000, tSZ_ν1, tSZ_ν1)
+        Dl_tSZ_22 = tSZ(tsz_pow_at_3000, tSZ_ν2, tSZ_ν2)
 
         # Calculate tSZ-CIB correlation
         # Sign defined such that a positive xi corresponds to a reduction at 150GHz
@@ -88,12 +87,12 @@ function tSZFrequencyScaling(ν, ν0, T)
     return tSZfac / tSZfac0
 end
 
-function tSZ(A_tSZ, ν1, ν2, ν0_tSZ)
+function tSZ(A_tSZ, ν1, ν2)
 
     # Calculate tSZ power
     Dl_tSZ = tSZ_template .* (A_tSZ *
-    tSZFrequencyScaling(ν1, ν0_tSZ, T_CMB) *
-    tSZFrequencyScaling(ν2, ν0_tSZ, T_CMB))
+    tSZFrequencyScaling(ν1, tSZ_ν0, T_CMB) *
+    tSZFrequencyScaling(ν2, tSZ_ν0, T_CMB))
     # Frequency scaling
 
     return Dl_tSZ
@@ -150,4 +149,33 @@ function poisson_power(SPT3G_windows_lmax, pow_at_3000)
     ells = Array(1:SPT3G_windows_lmax)
 
     return ells .* ells .* (pow_at_3000 / 3000 ^2)
+end
+
+### implementation proposal
+### write a function for each of the spectra type
+### in your likelihood, you are gonna call them several times. Beautiful? Not. But it should work
+
+function TT_foregrounds(D_TT_ν1_ν2, A_80_cirrus, α_cirrus, β_cirrus,
+    ν1_gc, ν2_gc, A_80_cib, α_cib, β_cib, ν1_cib, ν2_cib, z1, z2, A_tSZ, ν1_tSZ, ν2_tSZ,
+    ξ_tsz_CIB, A_kSZ, SPT3G_windows_lmax)###TT_params
+    #α_cib fixed to 0.8, we will do it at the likelihood level
+    #z1, z2 fixed to 1.
+    pp = poisson_power(SPT3G_windows_lmax, D_TT_ν1_ν2)
+    gd = GalacticDust(A_80_cirrus, α_cirrus, β_cirrus, ν1_gc, ν2_gc, SPT3G_windows_lmax)
+    cc = CIBClustering(A_80_cib, α_cib, β_cib, ν1_cib, ν2_cib, z1, z2, SPT3G_windows_lmax)
+    tsz = tSZ(A_tSZ, ν1_tSZ, ν2_tSZ)
+    tszcib = tSZCIBCorrelation(ξ_tsz_CIB, A_tSZ, A_80_cib, α_cirrus, β_cirrus,
+    z1, z2, ν1_cib, ν2_cib, ν1_tSZ, ν2_tSZ, SPT3G_windows_lmax)
+    ksz = kSZ(A_kSZ)
+    return pp.+gd.+cc.+tsz.+tszcib.+ksz
+end
+
+function TE_foregrounds(A_80_TE, α_TE, β_TE, ν1_te, ν2_te, SPT3G_windows_lmax)###TE_params
+    return GalacticDust(A_80_TE, α_TE, β_TE, ν1_te, ν2_te, SPT3G_windows_lmax)
+end
+
+function EE_foregrounds(D_EE_ν1_ν2, A_80_EE, α_EE, β_EE, ν1_ee, ν2_ee, SPT3G_windows_lmax)###EE_params
+    pp = poisson_power(SPT3G_windows_lmax, D_EE_ν1_ν2)
+    gd = GalacticDust(A_80_EE, α_EE, β_EE, ν1_ee, ν2_ee, SPT3G_windows_lmax)
+    return nothing
 end
