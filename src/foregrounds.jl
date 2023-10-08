@@ -6,16 +6,14 @@ Base.@kwdef struct SPT3G_2018_TTTEEE_Foregrounds
     CIB_ν0 = 150.
     CIB_T = 25.
     tSZ_ν0 = 143
-    tSZ_template::Array
-    kSZ_template::Array
 end
 
-#Planck distribution
+#Planck function normalised to 1 at ν0
 function Bnu(ν, ν0, T)
     return (ν / ν0)^3 * (exp(Ghz_Kelvin * ν0 / T) - 1.0) / (exp(Ghz_Kelvin * ν / T) - 1.0)
 end
 
-# Derivative of Planck function normalised to 1 at nu0
+# Derivative of Planck function normalised to 1 at ν0
 function dBdT(ν, ν0, T)
     x0 = Ghz_Kelvin * ν0 / T
     x = Ghz_Kelvin * ν / T
@@ -30,28 +28,24 @@ function DustFreqScaling(β, Tdust, ν0, ν_eff)
     return (ν_eff / ν0) ^ β * Bnu(ν_eff, ν0, Tdust) / dBdT(ν_eff, ν0, T_CMB)
 end
 
-function GalacticDust(pow_at_80, α, β, ν1, ν2, SPT3G_windows_lmax, T_galdust, ν_0_galdust)
+function GalacticDust(A_80, α, β, ν1, ν2, SPT3G_windows_lmax, T_galdust, ν_0_galdust)
 
-    ells = Array(1:SPT3G_windows_lmax)
+    ells = Array{Float64}(1:SPT3G_windows_lmax)
+    #TODO optimization opportunity:  the α exponent has a small dynamical range in the
+    # chains. Maybe an interpolator? Also, probably not doing the best thing even without it
 
     # Calculate and add galactic dust power
-    Dl_galdust =  (ells ./ 80) .^ (α + 2.0) .* (pow_at_80 *
+    Dl_galdust =  (ells ./ 80) .^ (α + 2.0) .* (A_80 *
     DustFreqScaling(β, T_galdust, ν_0_galdust, ν1) *
     DustFreqScaling(β, T_galdust, ν_0_galdust, ν2))
 
     return Dl_galdust
 end
 
-function GalacticDust(pow_at_80, α, β, ν1, ν2, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
-
-    return GalacticDust(pow_at_80, α, β, ν1, ν2, SPT_fg.ℓ_max, SPT_fg.galdust_T,
-                        SPT_fg.galdust_ν0)
-end
-
 function CIBClustering(pow_at_3000, α, β, ν1, ν2, z1, z2, SPT3G_windows_lmax, T_CIB,
     ν0_CIB)
 
-        ells = Array(1:SPT3G_windows_lmax)
+        ells = Array{Float64}(1:SPT3G_windows_lmax)
 
         # Calculate and add polarised galactic dust power
         Dl_cib_clustering =  (ells ./ 3000) .^ α .* (pow_at_3000 *
@@ -61,13 +55,7 @@ function CIBClustering(pow_at_3000, α, β, ν1, ν2, z1, z2, SPT3G_windows_lmax
         return Dl_cib_clustering
 end
 
-function CIBClustering(pow_at_3000, α, β, ν1, ν2,  z1, z2, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
-
-    return CIBClustering(pow_at_3000, α, β, ν1, ν2,  z1, z2, SPT_fg.ℓ_max, SPT_fg.CIB_T,
-                        SPT_fg.CIB_ν0)
-end
-
-function tSZCIBCorrelation(tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
+function tSZCIBCorrelation(ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
     z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT3G_windows_lmax, T_CIB, ν0_CIB, ν0_tSZ)
 
         # Calculate CIB components
@@ -77,8 +65,8 @@ function tSZCIBCorrelation(tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at
             CIB_pow_at_3000, α, β, CIB_ν2, CIB_ν2, z2, z2, SPT3G_windows_lmax, T_CIB, ν0_CIB)
 
         # Calculate the tSZ components
-        Dl_tSZ_11 = tSZ(tSZ_template, tsz_pow_at_3000, tSZ_ν1, tSZ_ν1, ν0_tSZ)
-        Dl_tSZ_22 = tSZ(tSZ_template, tsz_pow_at_3000, tSZ_ν2, tSZ_ν2, ν0_tSZ)
+        Dl_tSZ_11 = tSZ(tsz_pow_at_3000, tSZ_ν1, tSZ_ν1, ν0_tSZ)
+        Dl_tSZ_22 = tSZ(tsz_pow_at_3000, tSZ_ν2, tSZ_ν2, ν0_tSZ)
 
         # Calculate tSZ-CIB correlation
         # Sign defined such that a positive xi corresponds to a reduction at 150GHz
@@ -90,15 +78,6 @@ function tSZCIBCorrelation(tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at
         return Dl_tSZ_CIB_corr
 end
 
-function tSZCIBCorrelation(ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
-    z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
-
-    return tSZCIBCorrelation(SPT_fg.tSZ_template, ξ_tsz_CIB, tsz_pow_at_3000,
-    CIB_pow_at_3000, α, β, z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT_fg.ℓ_max,
-    SPT_fg.CIB_T, SPT_fg.CIB_ν0, SPT_fg.tSZ_ν0)
-end
-
-
 function tSZFrequencyScaling(ν, ν0, T)
     x0 = Ghz_Kelvin * ν0 / T
     x = Ghz_Kelvin * ν / T
@@ -109,10 +88,10 @@ function tSZFrequencyScaling(ν, ν0, T)
     return tSZfac / tSZfac0
 end
 
-function tSZ(tSZ_template, pow_at_3000, ν1, ν2, ν0_tSZ)
+function tSZ(A_tSZ, ν1, ν2, ν0_tSZ)
 
     # Calculate tSZ power
-    Dl_tSZ = tSZ_template .* (pow_at_3000 *
+    Dl_tSZ = tSZ_template .* (A_tSZ *
     tSZFrequencyScaling(ν1, ν0_tSZ, T_CMB) *
     tSZFrequencyScaling(ν2, ν0_tSZ, T_CMB))
     # Frequency scaling
@@ -120,17 +99,8 @@ function tSZ(tSZ_template, pow_at_3000, ν1, ν2, ν0_tSZ)
     return Dl_tSZ
 end
 
-function tSZ(pow_at_3000, ν1, ν2, ν0_tSZ, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
-
-    return tSZ(SPT_fg.tSZ_template, pow_at_3000, ν1, ν2, ν0_tSZ)
-end
-
-function kSZ(kSZ_template, pow_at_3000)
+function kSZ(pow_at_3000)
     return pow_at_3000 .* kSZ_template
-end
-
-function kSZ(pow_at_3000, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
-    return kSZ(SPT_fg.kSZ_template, pow_at_3000)
 end
 
 function _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
@@ -152,12 +122,11 @@ function apply_SuperSampleLensing(SPT3G_windows_lmax, κ, Dℓ_theory)
     #maybe better to have a get_Dl_derivative?
     ssl_correction .+= 2 .* Dℓ_theory
     ssl_correction .*= (-κ)
+
+    #TODO: pay attention: this is named apply, but you are not applying the correction
+    # you are just evaluating it!
+
     return ssl_correction
-end
-
-function apply_SuperSampleLensing(κ, Dℓ_theory, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
-
-    return apply_SuperSampleLensing(SPT_fg.ℓ_max, κ, Dℓ_theory)
 end
 
 function apply_abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
@@ -167,12 +136,10 @@ function apply_abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
     aberration_correction = -ab_coeff .* Cℓ_derivative .* ells
     aberration_correction .*= ells .* (ells .+ 1) ./ (2π)
 
+    #TODO: pay attention: this is named apply, but you are not applying the correction
+    # you are just evaluating it!
+
     return aberration_correction
-end
-
-function apply_abberation_correction(ab_coeff, Dℓ_theory, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
-
-    return apply_abberation_correction(SPT_fg.ℓ_max, ab_coeff, Dℓ_theory)
 end
 
 function apply_calibration(cal1, cal2, cal3, cal4)
@@ -183,8 +150,4 @@ function poisson_power(SPT3G_windows_lmax, pow_at_3000)
     ells = Array(1:SPT3G_windows_lmax)
 
     return ells .* ells .* (pow_at_3000 / 3000 ^2)
-end
-
-function poisson_power(pow_at_3000, SPT_fg::SPT3G_2018_TTTEEE_Foregrounds)
-    return poisson_power(SPT_fg.ℓ_max, pow_at_3000)
 end
