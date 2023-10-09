@@ -116,5 +116,9 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     model_matrix[17,:] = new_window[:,17,:]*TE_220_220
     model_matrix[18,:] = new_window[:,18,:]*EE_220_220
 
-    return model_matrix
+    residuals = model_matrix .- bandpowers
+
+    vec_residuals = vcat([residuals[spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
+    dbs = vcat([model_matrix[spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
+    return vec_residuals, dbs
 end
