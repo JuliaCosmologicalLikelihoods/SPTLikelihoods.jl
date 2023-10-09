@@ -32,6 +32,7 @@ end
 
 
 include("foregrounds.jl")
+include("utils.jl")
 
 # Physical constants
 const T_CMB = 2.72548  # CMB temperature
