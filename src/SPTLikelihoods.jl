@@ -26,5 +26,14 @@ const galdust_ν0 = 150.
 const CIB_ν0 = 150.
 const CIB_T = 25.0
 const tSZ_ν0 = 143.
+const spec_bin_min = [10,  1,  1, 10,  1,  1, 10,  1,  1, 10,  1,  1, 15,  1,  1, 15,  1,
+                      1]
+const spec_bin_max = [44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
+                      44]
+const bin_min = 1
+const bin_max = 44
+const windows_lmin = 1
+const windows_lmax = 3200
+
 
 end # module SPTLikelihoods
