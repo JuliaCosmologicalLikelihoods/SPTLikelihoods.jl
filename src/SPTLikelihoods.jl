@@ -15,6 +15,8 @@ function __init__()
         window[i,:,:] = npzread(joinpath(artifact"SPT3G_data", "window_"*string(i)*".npy"))
     end
 
+    global new_window = npzread(joinpath(artifact"SPT3G_data", "windows.npy"))
+
     global bandpowers = npzread(joinpath(artifact"SPT3G_data",
                                            "SPT3G_2018_TTTEEE_bandpowers.npy"))
     global beam_cov = npzread(joinpath(artifact"SPT3G_data",
