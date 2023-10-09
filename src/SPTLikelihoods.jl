@@ -10,6 +10,23 @@ function __init__()
                                            "tSZ_Dl_shaw10_153ghz_norm1.npy"))[1:3200, 2]
     global kSZ_template = npzread(joinpath(artifact"SPT3G_data",
                                            "kSZ_Dl_CSF_incl_patchy_norm1.npy"))[1:3200, 2]
+    global window = zeros(44,18,3200)
+    for i in 1:44
+        window[i,:,:] = npzread(joinpath(artifact"SPT3G_data", "window_"*string(i)*".npy"))
+    end
+
+    global bandpowers = npzread(joinpath(artifact"SPT3G_data",
+                                           "SPT3G_2018_TTTEEE_bandpowers.npy"))
+    global beam_cov = npzread(joinpath(artifact"SPT3G_data",
+                                           "SPT3G_2018_TTTEEE_beam_covariance.npy"))
+    global cal_cov = npzread(joinpath(artifact"SPT3G_data",
+                                           "SPT3G_2018_TTTEEE_cal_covariance.npy"))
+    global effective_band_centres = npzread(joinpath(artifact"SPT3G_data",
+                                           "SPT3G_2018_TTTEEE_effective_band_centres.npy"))
+    global fid_cov = npzread(joinpath(artifact"SPT3G_data",
+                                           "SPT3G_2018_TTTEEE_fiducial_covariance.npy"))
+    global cov = npzread(joinpath(artifact"SPT3G_data",
+                                           "SPT3G_2018_TTTEEE_covariance.npy"))
 
 end
 

@@ -1,6 +1,6 @@
-[SPT3G_data]
-git-tree-sha1 = "fb70e434ba9f16dd1af70411319cef8458a07938"
+[SPT3G]
+git-tree-sha1 = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
-    [[SPT3G_data.download]]
-    sha256 = "42586df16b171b0f64b49c71eeac32547c3069eae28052ee6c0015b7b28214e0"
-    url = "https://gist.github.com/marcobonici/1ff4e8dd85c9118c172290c7c98401f9/raw/fb70e434ba9f16dd1af70411319cef8458a07938.tar.gz"
+    [[SPT3G.download]]
+    sha256 = "1ec8d5c0d9a1b7d4c1b0a08f8d612933eef94427514aeed72a4abbea8d76298e"
+    url = "https://gist.github.com/marcobonici/e30db28ac5e993ee93e9f57ff140625b/raw/4b825dc642cb6eb9a060e54bf8d69288fbee4904.tar.gz"
