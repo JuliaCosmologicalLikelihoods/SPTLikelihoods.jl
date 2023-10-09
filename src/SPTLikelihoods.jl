@@ -28,7 +28,7 @@ function __init__()
     global fid_cov = npzread(joinpath(artifact"SPT3G_data",
                                            "SPT3G_2018_TTTEEE_fiducial_covariance.npy"))
     global cov = npzread(joinpath(artifact"SPT3G_data",
-                                           "SPT3G_2018_TTTEEE_covariance.npy"))
+                                           "bp_cov_posdef.npy"))
 
 end
 

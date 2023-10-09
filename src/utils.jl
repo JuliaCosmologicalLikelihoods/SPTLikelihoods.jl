@@ -9,10 +9,11 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     ssl_TE = _supersamplelensing(SPT3G_windows_lmax, κ, DL_TE)
     ssl_EE = _supersamplelensing(SPT3G_windows_lmax, κ, DL_EE)
     ab_coeff = -0.0004826
-    ab_TT = _abberation_correction(SPT3G_windows_lmax, ab_coeff, DL_TT)
-    ab_TE = _abberation_correction(SPT3G_windows_lmax, ab_coeff, DL_TE)
-    ab_EE = _abberation_correction(SPT3G_windows_lmax, ab_coeff, DL_EE)
+    ab_TT = _abberation_correction(SPT3G_windows_lmax, ab_coeff, DL_TT.+ssl_TT)
+    ab_TE = _abberation_correction(SPT3G_windows_lmax, ab_coeff, DL_TE.+ssl_TE)
+    ab_EE = _abberation_correction(SPT3G_windows_lmax, ab_coeff, DL_EE.+ssl_EE)
     ν_eff = effective_band_centres
+    #TODO check which nu index for our calculations
 
     TT_90_90   = (DL_TT.+ssl_TT.+ab_TT.+TT_foregrounds(D_TT_90_90, A_80_cirrus, α_cirrus, β_cirrus,
     ν_eff[1,1], ν_eff[1,1], A_80_cib, α_cib, β_cib, ν_eff[3,1], ν_eff[3,1], 1., 1., A_tSZ,
@@ -44,6 +45,7 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     ν_eff[5,3], ν_eff[5,3], ξ_tsz_CIB, A_kSZ, SPT3G_windows_lmax)) ./
     _calibration(cal_T_220, cal_T_220, cal_T_220, cal_T_220)
 
+
     EE_90_90   = (DL_EE.+ssl_EE.+ab_EE.+EE_foregrounds(D_EE_90_90, A_80_EE, α_EE, β_EE,
                                        ν_eff[2,1], ν_eff[2,1], SPT3G_windows_lmax)) ./
                                     _calibration(cal_E_90, cal_E_90, cal_E_90, cal_E_90)
@@ -70,27 +72,27 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
 
 
     TE_90_90   = (DL_TE.+ssl_TE.+ab_TE.+TE_foregrounds(A_80_TE, α_TE, β_TE,
-                                       ν_eff[4,1], ν_eff[4,1], SPT3G_windows_lmax)) ./
+                                       ν_eff[2,1], ν_eff[2,1], SPT3G_windows_lmax)) ./
                                     _calibration(cal_T_90, cal_E_90, cal_T_90, cal_E_90)
 
     TE_90_150  = (DL_TE.+ssl_TE.+ab_TE.+TE_foregrounds(A_80_TE, α_TE, β_TE,
-                                       ν_eff[4,1], ν_eff[4,2], SPT3G_windows_lmax)) ./
+                                       ν_eff[2,1], ν_eff[2,2], SPT3G_windows_lmax)) ./
                                     _calibration(cal_T_90, cal_E_150, cal_T_150, cal_E_90)
 
     TE_90_220  = (DL_TE.+ssl_TE.+ab_TE.+TE_foregrounds(A_80_TE, α_TE, β_TE,
-                                       ν_eff[4,1], ν_eff[4,3], SPT3G_windows_lmax)) ./
+                                       ν_eff[2,1], ν_eff[2,3], SPT3G_windows_lmax)) ./
                                     _calibration(cal_T_90, cal_E_220, cal_T_220, cal_E_90)
 
     TE_150_150 = (DL_TE.+ssl_TE.+ab_TE.+TE_foregrounds(A_80_TE, α_TE, β_TE,
-                                       ν_eff[4,2], ν_eff[4,2], SPT3G_windows_lmax)) ./
+                                       ν_eff[2,2], ν_eff[2,2], SPT3G_windows_lmax)) ./
                                     _calibration(cal_T_150, cal_E_150, cal_T_150, cal_E_150)
 
     TE_150_220 = (DL_TE.+ssl_TE.+ab_TE.+TE_foregrounds(A_80_TE, α_TE, β_TE,
-                                       ν_eff[4,2], ν_eff[4,3], SPT3G_windows_lmax)) ./
+                                       ν_eff[2,2], ν_eff[2,3], SPT3G_windows_lmax)) ./
                                     _calibration(cal_T_150, cal_E_220, cal_T_150, cal_E_220)
 
     TE_220_220 = (DL_TE.+ssl_TE.+ab_TE.+TE_foregrounds(A_80_TE, α_TE, β_TE,
-                                       ν_eff[4,3], ν_eff[4,3], SPT3G_windows_lmax)) ./
+                                       ν_eff[2,3], ν_eff[2,3], SPT3G_windows_lmax)) ./
                                     _calibration(cal_T_220, cal_E_220, cal_T_220, cal_E_220)
 
     model_matrix = zeros(18, 44)
