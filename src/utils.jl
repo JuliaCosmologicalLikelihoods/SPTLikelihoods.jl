@@ -1,3 +1,4 @@
+
 function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     D_TT_90_90, D_TT_90_150, D_TT_90_220, D_TT_150_150, D_TT_150_220, D_TT_220_220,#6+1=7
     D_EE_90_90, D_EE_90_150, D_EE_90_220, D_EE_150_150, D_EE_150_220, D_EE_220_220,#6+7=13
@@ -97,24 +98,24 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
 
     model_matrix = zeros(18, 44)
 
-    model_matrix[1,:]  = new_window[:,1,:]*TT_90_90
-    model_matrix[2,:]  = new_window[:,2,:]*TE_90_90
-    model_matrix[3,:]  = new_window[:,3,:]*EE_90_90
-    model_matrix[4,:]  = new_window[:,4,:]*TT_90_150
-    model_matrix[5,:]  = new_window[:,5,:]*TE_90_150
-    model_matrix[6,:]  = new_window[:,6,:]*EE_90_150
-    model_matrix[7,:]  = new_window[:,7,:]*TT_90_220
-    model_matrix[8,:]  = new_window[:,8,:]*TE_90_220
-    model_matrix[9,:]  = new_window[:,9,:]*EE_90_220
-    model_matrix[10,:] = new_window[:,10,:]*TT_150_150
-    model_matrix[11,:] = new_window[:,11,:]*TE_150_150
-    model_matrix[12,:] = new_window[:,12,:]*EE_150_150
-    model_matrix[13,:] = new_window[:,13,:]*TT_150_220
-    model_matrix[14,:] = new_window[:,14,:]*TE_150_220
-    model_matrix[15,:] = new_window[:,15,:]*EE_150_220
-    model_matrix[16,:] = new_window[:,16,:]*TT_220_220
-    model_matrix[17,:] = new_window[:,17,:]*TE_220_220
-    model_matrix[18,:] = new_window[:,18,:]*EE_220_220
+    @views model_matrix[1,:]  = new_window[:,1,:]*TT_90_90
+    @views model_matrix[2,:]  = new_window[:,2,:]*TE_90_90
+    @views model_matrix[3,:]  = new_window[:,3,:]*EE_90_90
+    @views model_matrix[4,:]  = new_window[:,4,:]*TT_90_150
+    @views model_matrix[5,:]  = new_window[:,5,:]*TE_90_150
+    @views model_matrix[6,:]  = new_window[:,6,:]*EE_90_150
+    @views model_matrix[7,:]  = new_window[:,7,:]*TT_90_220
+    @views model_matrix[8,:]  = new_window[:,8,:]*TE_90_220
+    @views model_matrix[9,:]  = new_window[:,9,:]*EE_90_220
+    @views model_matrix[10,:] = new_window[:,10,:]*TT_150_150
+    @views model_matrix[11,:] = new_window[:,11,:]*TE_150_150
+    @views model_matrix[12,:] = new_window[:,12,:]*EE_150_150
+    @views model_matrix[13,:] = new_window[:,13,:]*TT_150_220
+    @views model_matrix[14,:] = new_window[:,14,:]*TE_150_220
+    @views model_matrix[15,:] = new_window[:,15,:]*EE_150_220
+    @views model_matrix[16,:] = new_window[:,16,:]*TT_220_220
+    @views model_matrix[17,:] = new_window[:,17,:]*TE_220_220
+    @views model_matrix[18,:] = new_window[:,18,:]*EE_220_220
 
     residuals = model_matrix .- bandpowers
 
