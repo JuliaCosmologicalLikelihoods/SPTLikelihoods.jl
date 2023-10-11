@@ -39,7 +39,7 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     TT_150_220 = (DL_TT.+ssl_TT.+ab_TT.+TT_foregrounds(D_TT_150_220, A_80_cirrus, α_cirrus, β_cirrus,
     ν_eff[1,2], ν_eff[1,3], A_80_cib, α_cib, β_cib, ν_eff[3,2], ν_eff[3,3], 1., 1., A_tSZ,
     ν_eff[5,2], ν_eff[5,3], ξ_tsz_CIB, A_kSZ, SPT3G_windows_lmax)) ./
-    _calibration(cal_T_150, cal_T_150, cal_T_220, cal_T_220)
+    _calibration(cal_T_150, cal_T_220, cal_T_220, cal_T_150)
 
     TT_220_220 = (DL_TT.+ssl_TT.+ab_TT.+TT_foregrounds(D_TT_220_220, A_80_cirrus, α_cirrus, β_cirrus,
     ν_eff[1,3], ν_eff[1,3], A_80_cib, α_cib, β_cib, ν_eff[3,3], ν_eff[3,3], 1., 1., A_tSZ,
@@ -65,7 +65,7 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
 
     EE_150_220 = (DL_EE.+ssl_EE.+ab_EE.+EE_foregrounds(D_EE_150_220, A_80_EE, α_EE, β_EE,
                                        ν_eff[2,2], ν_eff[2,3], SPT3G_windows_lmax)) ./
-                                    _calibration(cal_E_150, cal_E_220, cal_E_150, cal_E_220)
+                                    _calibration(cal_E_150, cal_E_220, cal_E_220, cal_E_150)
 
     EE_220_220 = (DL_EE.+ssl_EE.+ab_EE.+EE_foregrounds(D_EE_220_220, A_80_EE, α_EE, β_EE,
                                        ν_eff[2,3], ν_eff[2,3], SPT3G_windows_lmax)) ./
@@ -90,7 +90,7 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
 
     TE_150_220 = (DL_TE.+ssl_TE.+ab_TE.+TE_foregrounds(A_80_TE, α_TE, β_TE,
                                        ν_eff[2,2], ν_eff[2,3], SPT3G_windows_lmax)) ./
-                                    _calibration(cal_T_150, cal_E_220, cal_T_150, cal_E_220)
+                                    _calibration(cal_T_150, cal_E_220, cal_T_220, cal_E_150)
 
     TE_220_220 = (DL_TE.+ssl_TE.+ab_TE.+TE_foregrounds(A_80_TE, α_TE, β_TE,
                                        ν_eff[2,3], ν_eff[2,3], SPT3G_windows_lmax)) ./
@@ -117,9 +117,9 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     @views model_matrix[17,:] = new_window[:,17,:]*TE_220_220
     @views model_matrix[18,:] = new_window[:,18,:]*EE_220_220
 
-    residuals = model_matrix .- bandpowers
+    residuals = bandpowers .- model_matrix
 
-    vec_residuals = vcat([residuals[spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
-    dbs = vcat([model_matrix[spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
+    vec_residuals = vcat([residuals[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
+    dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     return vec_residuals, dbs
 end
