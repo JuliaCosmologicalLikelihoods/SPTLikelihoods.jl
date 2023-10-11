@@ -57,24 +57,24 @@ end
 function _tSZ_CIB_correlation(ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
     z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT3G_windows_lmax)
 
-        # Calculate CIB components
-        Dl_cib_clustering_11 = _CIB_clustering(
-        CIB_pow_at_3000, α, β, CIB_ν1, CIB_ν1, z1, z1, SPT3G_windows_lmax)
-        Dl_cib_clustering_22 = _CIB_clustering(
-            CIB_pow_at_3000, α, β, CIB_ν2, CIB_ν2, z2, z2, SPT3G_windows_lmax)
+    # Calculate CIB components
+    Dl_cib_clustering_11 = _CIB_clustering(
+    CIB_pow_at_3000, α, β, CIB_ν1, CIB_ν1, z1, z1, SPT3G_windows_lmax)
+    Dl_cib_clustering_22 = _CIB_clustering(
+        CIB_pow_at_3000, α, β, CIB_ν2, CIB_ν2, z2, z2, SPT3G_windows_lmax)
 
-        # Calculate the tSZ components
-        Dl_tSZ_11 = _tSZ(tsz_pow_at_3000, tSZ_ν1, tSZ_ν1)
-        Dl_tSZ_22 = _tSZ(tsz_pow_at_3000, tSZ_ν2, tSZ_ν2)
+    # Calculate the tSZ components
+    Dl_tSZ_11 = _tSZ(tsz_pow_at_3000, tSZ_ν1, tSZ_ν1)
+    Dl_tSZ_22 = _tSZ(tsz_pow_at_3000, tSZ_ν2, tSZ_ν2)
 
-        # Calculate tSZ-CIB correlation
-        # Sign defined such that a positive xi corresponds to a reduction at 150GHz
-        #TODO: maybe use NaNMath.jl to deal with possible NaNs?
-        """Dl_tSZ_CIB_corr = ( -1 * ξ_tsz_CIB
-                .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
-                   sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))"""
+    # Calculate tSZ-CIB correlation
+    # Sign defined such that a positive xi corresponds to a reduction at 150GHz
+    #TODO: maybe use NaNMath.jl to deal with possible NaNs?
+    """Dl_tSZ_CIB_corr = ( -1 * ξ_tsz_CIB
+            .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
+                sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))"""
 
-        return ( -1 * ξ_tsz_CIB .* (sqrt.(Dl_tSZ_11 .* Dl_cib_clustering_22) .+
+    return ( -1 * ξ_tsz_CIB .* (sqrt.(Dl_tSZ_11 .* Dl_cib_clustering_22) .+
                                     sqrt.(Dl_tSZ_22 .* Dl_cib_clustering_11)))
 end
 
@@ -167,7 +167,7 @@ function TT_foregrounds(D_TT_ν1_ν2, A_80_cirrus, α_cirrus, β_cirrus,
     gd = _galactic_dust(A_80_cirrus, α_cirrus, β_cirrus, ν1_gc, ν2_gc, SPT3G_windows_lmax)
     cc = _CIB_clustering(A_80_cib, α_cib, β_cib, ν1_cib, ν2_cib, z1, z2, SPT3G_windows_lmax)
     tsz = _tSZ(A_tSZ, ν1_tSZ, ν2_tSZ)
-    tszcib = _tSZ_CIB_correlation(ξ_tsz_CIB, A_tSZ, A_80_cib, α_cirrus, β_cirrus,
+    tszcib = _tSZ_CIB_correlation(ξ_tsz_CIB, A_tSZ, A_80_cib, α_cib, β_cib,
     z1, z2, ν1_cib, ν2_cib, ν1_tSZ, ν2_tSZ, SPT3G_windows_lmax)
     ksz = _kSZ(A_kSZ)
     return pp.+gd.+cc.+tsz.+tszcib.+ksz
