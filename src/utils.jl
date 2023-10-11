@@ -14,8 +14,21 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     ab_TE = _abberation_correction(SPT3G_windows_lmax, ab_coeff, DL_TE.+ssl_TE)
     ab_EE = _abberation_correction(SPT3G_windows_lmax, ab_coeff, DL_EE.+ssl_EE)
     ν_eff = effective_band_centres
-    #TODO check which nu index for our calculations
 
+    #TODO probably this HORRIBLE thing can be transformed in a nested for loop
+    #result = zeros(18,3200)
+    #idx = 0
+    #for i in 1:3
+    #for j in i:3
+    #idx+=1
+    #result[3*(i-1)+1] = TT_calculation(ν[i], ν[j])
+    #result[3*(i-1)+2] = TE_calculation(ν[i], ν[j])
+    #result[3*(i-1)+3] = EE_calculation(ν[i], ν[j])
+    #end
+    #end
+    #for i in 1:18
+    #@views model_matrix[i,:]  = window[:,i,:]*result[i,:]
+    #end
     TT_90_90   = (DL_TT.+ssl_TT.+ab_TT.+TT_foregrounds(D_TT_90_90, A_80_cirrus, α_cirrus, β_cirrus,
     ν_eff[1,1], ν_eff[1,1], A_80_cib, α_cib, β_cib, ν_eff[3,1], ν_eff[3,1], 1., 1., A_tSZ,
     ν_eff[5,1], ν_eff[5,1], ξ_tsz_CIB, A_kSZ, SPT3G_windows_lmax)) ./
@@ -122,4 +135,23 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     vec_residuals = vcat([residuals[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     return vec_residuals, dbs
+end
+
+function compute_theory_cov(DL_TT, DL_TE, DL_EE, κ,
+    D_TT_90_90, D_TT_90_150, D_TT_90_220, D_TT_150_150, D_TT_150_220, D_TT_220_220,
+    D_EE_90_90, D_EE_90_150, D_EE_90_220, D_EE_150_150, D_EE_150_220, D_EE_220_220,
+    A_80_cirrus, α_cirrus, β_cirrus, A_80_cib, α_cib, β_cib, A_tSZ, ξ_tsz_CIB,
+    A_kSZ, A_80_EE, α_EE, β_EE, A_80_TE, α_TE, β_TE,
+    cal_T_90, cal_T_150, cal_T_220, cal_E_90, cal_E_150, cal_E_220, SPT3G_windows_lmax)
+
+    vec_residuals, dbs = compute_theory(DL_TT, DL_TE, DL_EE, κ,
+    D_TT_90_90, D_TT_90_150, D_TT_90_220, D_TT_150_150, D_TT_150_220, D_TT_220_220,
+    D_EE_90_90, D_EE_90_150, D_EE_90_220, D_EE_150_150, D_EE_150_220, D_EE_220_220,
+    A_80_cirrus, α_cirrus, β_cirrus, A_80_cib, α_cib, β_cib, A_tSZ, ξ_tsz_CIB,
+    A_kSZ, A_80_EE, α_EE, β_EE, A_80_TE, α_TE, β_TE,
+    cal_T_90, cal_T_150, cal_T_220, cal_E_90, cal_E_150, cal_E_220, SPT3G_windows_lmax)
+
+    Σ = cov .+ beam_cov .* kron(dbs, dbs')
+
+    return vec_residuals, Σ
 end
