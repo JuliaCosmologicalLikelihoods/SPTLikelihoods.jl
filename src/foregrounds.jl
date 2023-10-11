@@ -123,12 +123,8 @@ function _supersamplelensing(SPT3G_windows_lmax, κ, Dℓ_theory)
     ssl_correction = ells .* Cℓ_derivative  .* ells .* (ells .+ 1) ./ (2π)
     #maybe better to have a get_Dl_derivative?
     ssl_correction .+= 2 .* Dℓ_theory
-    ssl_correction .*= (-κ)
 
-    #TODO: pay attention: this is named apply, but you are not applying the correction
-    # you are just evaluating it!
-
-    return ssl_correction
+    return ssl_correction .* (-κ)
 end
 
 function _abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
