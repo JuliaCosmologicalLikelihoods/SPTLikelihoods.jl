@@ -109,33 +109,39 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
                                        ν_eff[2,3], ν_eff[2,3], SPT3G_windows_lmax)) ./
                                     _calibration(cal_T_220, cal_E_220, cal_T_220, cal_E_220)
 
-    model_matrix = zeros(18, 44)
+    pure_theory = hcat(TT_90_90, TE_90_90, EE_90_90,
+                       TT_90_150, TE_90_150, EE_90_150,
+                       TT_90_220, TE_90_220, EE_90_220,
+                       TT_150_150, TE_150_150, EE_150_150,
+                       TT_150_220, TE_150_220, EE_150_220,
+                       TT_220_220, TE_220_220, EE_220_220)
 
-    @views model_matrix[1,:]  = window[:,1,:]*TT_90_90
-    @views model_matrix[2,:]  = window[:,2,:]*TE_90_90
-    @views model_matrix[3,:]  = window[:,3,:]*EE_90_90
-    @views model_matrix[4,:]  = window[:,4,:]*TT_90_150
-    @views model_matrix[5,:]  = window[:,5,:]*TE_90_150
-    @views model_matrix[6,:]  = window[:,6,:]*EE_90_150
-    @views model_matrix[7,:]  = window[:,7,:]*TT_90_220
-    @views model_matrix[8,:]  = window[:,8,:]*TE_90_220
-    @views model_matrix[9,:]  = window[:,9,:]*EE_90_220
-    @views model_matrix[10,:] = window[:,10,:]*TT_150_150
-    @views model_matrix[11,:] = window[:,11,:]*TE_150_150
-    @views model_matrix[12,:] = window[:,12,:]*EE_150_150
-    @views model_matrix[13,:] = window[:,13,:]*TT_150_220
-    @views model_matrix[14,:] = window[:,14,:]*TE_150_220
-    @views model_matrix[15,:] = window[:,15,:]*EE_150_220
-    @views model_matrix[16,:] = window[:,16,:]*TT_220_220
-    @views model_matrix[17,:] = window[:,17,:]*TE_220_220
-    @views model_matrix[18,:] = window[:,18,:]*EE_220_220
+    model_matrix = hcat([@views window[:,i,:]*pure_theory[:,i] for i in 1:18]...)'#multiply_matrix(window, pure_theory)
 
     residuals = bandpowers .- model_matrix
 
     vec_residuals = vcat([residuals[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
-    return vec_residuals, dbs
+    return vec_residuals#, dbs
+    #return window[:,1,:]*TT_90_90
 end
+
+function multiply_matrix(window, theory)
+    """model_matrix = Array{T}(zeros(18, 44))
+    @info T
+
+    for i in 1:18
+        @views model_matrix[i,:] = window[:,i,:]*theory[:,i]
+    end"""
+
+    model_matrix = hcat([@views window[:,i,:]*theory[:,i] for i in 1:18]...)'
+
+
+
+    return model_matrix
+
+end
+
 
 function compute_theory_cov(DL_TT, DL_TE, DL_EE, κ,
     D_TT_90_90, D_TT_90_150, D_TT_90_220, D_TT_150_150, D_TT_150_220, D_TT_220_220,
