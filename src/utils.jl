@@ -126,7 +126,7 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
 
     #vec_residuals = vcat([residuals[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     #dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
-    return model_matrix
+    return model_matrix'
 end
 
 function slice_theory(model_matrix)
