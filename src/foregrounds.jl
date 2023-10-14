@@ -74,8 +74,8 @@ function _tSZ_CIB_correlation(ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, 
             .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
                 sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))"""
 
-    return ( -1 * ξ_tsz_CIB .* (sqrt.(Dl_tSZ_11 .* Dl_cib_clustering_22) .+
-                                    sqrt.(Dl_tSZ_22 .* Dl_cib_clustering_11)))
+    return ( -1 * ξ_tsz_CIB .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
+                                    sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))
 end
 
 function _tSZ_f_scaling(ν, ν0, T)
