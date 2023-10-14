@@ -109,14 +109,18 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
                                        ν_eff[2,3], ν_eff[2,3], SPT3G_windows_lmax)) ./
                                     _calibration(cal_T_220, cal_E_220, cal_T_220, cal_E_220)
 
-    pure_theory = hcat(TT_90_90, TE_90_90, EE_90_90,
-                       TT_90_150, TE_90_150, EE_90_150,
-                       TT_90_220, TE_90_220, EE_90_220,
-                       TT_150_150, TE_150_150, EE_150_150,
-                       TT_150_220, TE_150_220, EE_150_220,
-                       TT_220_220, TE_220_220, EE_220_220)
+    pure_theory = [
+      TT_90_90, TE_90_90, EE_90_90,
+      TT_90_150, TE_90_150, EE_90_150,
+      TT_90_220, TE_90_220, EE_90_220,
+      TT_150_150, TE_150_150, EE_150_150,
+      TT_150_220, TE_150_220, EE_150_220,
+      TT_220_220, TE_220_220, EE_220_220
+    ]
 
-    model_matrix = hcat([@views window[:,i,:]*pure_theory[:,i] for i in 1:18]...)'
+    model_matrix = stack(1:18) do i
+       @view(window[:,:,i])' * pure_theory[i]
+    end
 
     #residuals = bandpowers .- model_matrix
 

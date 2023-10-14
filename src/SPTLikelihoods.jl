@@ -3,27 +3,38 @@ import Base.@kwdef
 using Artifacts
 using NPZ
 
+
+const tSZ_template = Vector{Float64}(undef, 3200)
+const kSZ_template = Vector{Float64}(undef, 3200)
+const window = Array{Float64,3}(undef, 3200, 44, 18)
+const bandpowers = Matrix{Float64}(undef, 18, 44)
+const beam_cov = Matrix{Float64}(undef, 728, 728)
+const cal_cov = Matrix{Float64}(undef, 6, 6)
+const effective_band_centres = Matrix{Float64}(undef, 5, 3)
+const fid_cov = Matrix{Float64}(undef, 768, 768)
+const cov = Matrix{Float64}(undef, 728, 728)
+
 function __init__()
     #check : lmax=3200?
 
-    global tSZ_template = npzread(joinpath(artifact"SPT3G_data",
+    tSZ_template .= npzread(joinpath(artifact"SPT3G_data",
                                            "tSZ_Dl_shaw10_153ghz_norm1.npy"))[1:3200, 2]
-    global kSZ_template = npzread(joinpath(artifact"SPT3G_data",
+    kSZ_template .= npzread(joinpath(artifact"SPT3G_data",
                                            "kSZ_Dl_CSF_incl_patchy_norm1.npy"))[1:3200, 2]
 
-    global window = npzread(joinpath(artifact"SPT3G_data", "windows.npy"))
+    window .= permutedims(npzread(joinpath(artifact"SPT3G_data", "windows.npy")), (3, 1, 2))
 
-    global bandpowers = npzread(joinpath(artifact"SPT3G_data",
+    bandpowers .= npzread(joinpath(artifact"SPT3G_data",
                                            "SPT3G_2018_TTTEEE_bandpowers.npy"))
-    global beam_cov = npzread(joinpath(artifact"SPT3G_data",
+    beam_cov .= npzread(joinpath(artifact"SPT3G_data",
                                            "SPT3G_2018_TTTEEE_beam_covariance.npy"))
-    global cal_cov = npzread(joinpath(artifact"SPT3G_data",
+    cal_cov .= npzread(joinpath(artifact"SPT3G_data",
                                            "SPT3G_2018_TTTEEE_cal_covariance.npy"))
-    global effective_band_centres = npzread(joinpath(artifact"SPT3G_data",
+    effective_band_centres .= npzread(joinpath(artifact"SPT3G_data",
                                            "SPT3G_2018_TTTEEE_effective_band_centres.npy"))
-    global fid_cov = npzread(joinpath(artifact"SPT3G_data",
+    fid_cov .= npzread(joinpath(artifact"SPT3G_data",
                                            "SPT3G_2018_TTTEEE_fiducial_covariance.npy"))
-    global cov = npzread(joinpath(artifact"SPT3G_data",
+    cov .= npzread(joinpath(artifact"SPT3G_data",
                                            "bp_cov_posdef.npy"))
 
 end
