@@ -116,48 +116,25 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
                        TT_150_220, TE_150_220, EE_150_220,
                        TT_220_220, TE_220_220, EE_220_220)
 
-    model_matrix = hcat([@views window[:,i,:]*pure_theory[:,i] for i in 1:18]...)'#multiply_matrix(window, pure_theory)
+    model_matrix = hcat([@views window[:,i,:]*pure_theory[:,i] for i in 1:18]...)'
 
-    residuals = bandpowers .- model_matrix
+    #residuals = bandpowers .- model_matrix
 
-    vec_residuals = vcat([residuals[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
-    dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
-    return vec_residuals#, dbs
-    #return window[:,1,:]*TT_90_90
-end
-
-function multiply_matrix(window, theory)
-    """model_matrix = Array{T}(zeros(18, 44))
-    @info T
-
-    for i in 1:18
-        @views model_matrix[i,:] = window[:,i,:]*theory[:,i]
-    end"""
-
-    model_matrix = hcat([@views window[:,i,:]*theory[:,i] for i in 1:18]...)'
-
-
-
+    #vec_residuals = vcat([residuals[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
+    #dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     return model_matrix
-
 end
 
+function slice_theory(model_matrix)
+    residuals = bandpowers .- model_matrix
+    vec_residuals = vcat([residuals[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
 
-function compute_theory_cov(DL_TT, DL_TE, DL_EE, κ,
-    D_TT_90_90, D_TT_90_150, D_TT_90_220, D_TT_150_150, D_TT_150_220, D_TT_220_220,
-    D_EE_90_90, D_EE_90_150, D_EE_90_220, D_EE_150_150, D_EE_150_220, D_EE_220_220,
-    A_80_cirrus, α_cirrus, β_cirrus, A_80_cib, α_cib, β_cib, A_tSZ, ξ_tsz_CIB,
-    A_kSZ, A_80_EE, α_EE, β_EE, A_80_TE, α_TE, β_TE,
-    cal_T_90, cal_T_150, cal_T_220, cal_E_90, cal_E_150, cal_E_220, SPT3G_windows_lmax)
+    return vec_residuals
+end
 
-    vec_residuals, dbs = compute_theory(DL_TT, DL_TE, DL_EE, κ,
-    D_TT_90_90, D_TT_90_150, D_TT_90_220, D_TT_150_150, D_TT_150_220, D_TT_220_220,
-    D_EE_90_90, D_EE_90_150, D_EE_90_220, D_EE_150_150, D_EE_150_220, D_EE_220_220,
-    A_80_cirrus, α_cirrus, β_cirrus, A_80_cib, α_cib, β_cib, A_tSZ, ξ_tsz_CIB,
-    A_kSZ, A_80_EE, α_EE, β_EE, A_80_TE, α_TE, β_TE,
-    cal_T_90, cal_T_150, cal_T_220, cal_E_90, cal_E_150, cal_E_220, SPT3G_windows_lmax)
-
+function compute_cov(model_matrix)
+    dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     Σ = cov .+ beam_cov .* kron(dbs, dbs')
 
-    return vec_residuals, Σ
+    return Σ
 end
