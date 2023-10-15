@@ -1,7 +1,7 @@
 name = "SPTLikelihoods"
 uuid = "843b1235-59c8-469d-b900-1f4e1bdb4f86"
-authors = ["Marco Bonici <bonici.marco@gmail.com>"]
-version = "0.1.0"
+authors = ["Marco Bonici <bonici.marco@gmail.com>, Marius Millea <mariusmillea@gmail.com>"]
+version = "0.2.0"
 
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"

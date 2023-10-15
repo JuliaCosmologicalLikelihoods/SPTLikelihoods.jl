@@ -139,6 +139,5 @@ end
 function compute_cov(model_matrix)
     dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     Σ = cov .+ beam_cov .* kron(dbs, dbs')
-
     return Σ
 end
