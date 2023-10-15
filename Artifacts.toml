@@ -1,0 +1,6 @@
+[SPT3G_data]
+git-tree-sha1 = "78941dcede3acc2106f629faa126e9031a1c3fb5"
+
+    [[SPT3G_data.download]]
+    sha256 = "d820ab49e40803150e0c9ead26bfb43b5bab3c8634c07afe919e9b9ceeeeeadd"
+    url = "https://gist.github.com/marcobonici/243fd36d6ee9809b619b2216a9ff1b0e/raw/78941dcede3acc2106f629faa126e9031a1c3fb5.tar.gz"
