@@ -62,5 +62,4 @@ const bin_max = 44
 const windows_lmin = 1
 const windows_lmax = 3200
 
-
 end # module SPTLikelihoods
