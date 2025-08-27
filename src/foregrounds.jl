@@ -152,9 +152,13 @@ function _abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
     return aberration_correction
 end
 
+aberration_response(ℓs, ab_coeff, Dℓ_theory) = CMBForegrounds.aberration_response(ℓs, ab_coeff, Dℓ_theory)
+
 function _calibration(cal1, cal2, cal3, cal4)
     return 0.5 * (cal1 * cal2 + cal3 * cal4)
 end
+
+cross_calibration_mean(cal1, cal2, cal3, cal4) = CMBForegrounds.cross_calibration_mean(cal1, cal2, cal3, cal4)
 
 function _poisson_power(SPT3G_windows_lmax, pow_at_3000)
     ells = Array(1:SPT3G_windows_lmax)
