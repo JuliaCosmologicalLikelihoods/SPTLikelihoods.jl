@@ -1,6 +1,7 @@
 module SPTLikelihoods
 import Base.@kwdef
 using Artifacts
+using CMBForegrounds: CMBForegrounds
 using NPZ
 
 
@@ -18,24 +19,24 @@ function __init__()
     #check : lmax=3200?
 
     tSZ_template .= npzread(joinpath(artifact"SPT3G_data",
-                                           "tSZ_Dl_shaw10_153ghz_norm1.npy"))[1:3200, 2]
+        "tSZ_Dl_shaw10_153ghz_norm1.npy"))[1:3200, 2]
     kSZ_template .= npzread(joinpath(artifact"SPT3G_data",
-                                           "kSZ_Dl_CSF_incl_patchy_norm1.npy"))[1:3200, 2]
+        "kSZ_Dl_CSF_incl_patchy_norm1.npy"))[1:3200, 2]
 
     window .= permutedims(npzread(joinpath(artifact"SPT3G_data", "windows.npy")), (3, 1, 2))
 
     bandpowers .= npzread(joinpath(artifact"SPT3G_data",
-                                           "SPT3G_2018_TTTEEE_bandpowers.npy"))
+        "SPT3G_2018_TTTEEE_bandpowers.npy"))
     beam_cov .= npzread(joinpath(artifact"SPT3G_data",
-                                           "SPT3G_2018_TTTEEE_beam_covariance.npy"))
+        "SPT3G_2018_TTTEEE_beam_covariance.npy"))
     cal_cov .= npzread(joinpath(artifact"SPT3G_data",
-                                           "SPT3G_2018_TTTEEE_cal_covariance.npy"))
+        "SPT3G_2018_TTTEEE_cal_covariance.npy"))
     effective_band_centres .= npzread(joinpath(artifact"SPT3G_data",
-                                           "SPT3G_2018_TTTEEE_effective_band_centres.npy"))
+        "SPT3G_2018_TTTEEE_effective_band_centres.npy"))
     fid_cov .= npzread(joinpath(artifact"SPT3G_data",
-                                           "SPT3G_2018_TTTEEE_fiducial_covariance.npy"))
+        "SPT3G_2018_TTTEEE_fiducial_covariance.npy"))
     cov .= npzread(joinpath(artifact"SPT3G_data",
-                                           "bp_cov_posdef.npy"))
+        "bp_cov_posdef.npy"))
 
 end
 
@@ -49,14 +50,14 @@ const h = 6.62606957e-34  # Planck's constant
 const kB = 1.3806488e-23  # Boltzmann constant
 const Ghz_Kelvin = h / kB * 1e9
 const galdust_T = 19.6
-const galdust_ν0 = 150.
-const CIB_ν0 = 150.
+const galdust_ν0 = 150.0
+const CIB_ν0 = 150.0
 const CIB_T = 25.0
-const tSZ_ν0 = 143.
-const spec_bin_min = [10,  1,  1, 10,  1,  1, 10,  1,  1, 10,  1,  1, 15,  1,  1, 15,  1,
-                      1]
+const tSZ_ν0 = 143.0
+const spec_bin_min = [10, 1, 1, 10, 1, 1, 10, 1, 1, 10, 1, 1, 15, 1, 1, 15, 1,
+    1]
 const spec_bin_max = [44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44,
-                      44]
+    44]
 const bin_min = 1
 const bin_max = 44
 const windows_lmin = 1

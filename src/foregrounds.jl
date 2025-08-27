@@ -1,10 +1,10 @@
 Base.@kwdef struct SPT3G_2018_TTTEEE_Foregrounds
-    ℓ_min::Integer=1
-    ℓ_max::Integer=3200
-    galdust_ν0=150
-    galdust_T=19.6
-    CIB_ν0 = 150.
-    CIB_T = 25.
+    ℓ_min::Integer = 1
+    ℓ_max::Integer = 3200
+    galdust_ν0 = 150
+    galdust_T = 19.6
+    CIB_ν0 = 150.0
+    CIB_T = 25.0
     tSZ_ν0 = 143
 end
 
@@ -25,7 +25,7 @@ function _dBdT(ν, ν0, T)
 end
 
 function _dust_f_scaling(β, Tdust, ν0, ν_eff)
-    return (ν_eff / ν0) ^ β * _Bnu(ν_eff, ν0, Tdust) / _dBdT(ν_eff, ν0, T_CMB)
+    return (ν_eff / ν0)^β * _Bnu(ν_eff, ν0, Tdust) / _dBdT(ν_eff, ν0, T_CMB)
 end
 
 function _galactic_dust(A_80, α, β, ν1, ν2, SPT3G_windows_lmax)
@@ -35,31 +35,35 @@ function _galactic_dust(A_80, α, β, ν1, ν2, SPT3G_windows_lmax)
     # chains. Maybe an interpolator? Also, probably not doing the best thing even without it
 
     # Calculate and add galactic dust power
-    Dl_galdust =  (ells ./ 80) .^ (α + 2.0) .* (A_80 *
-    _dust_f_scaling(β, galdust_T, galdust_ν0, ν1) *
-    _dust_f_scaling(β, galdust_T, galdust_ν0, ν2))
+    Dl_galdust = (ells ./ 80) .^ (α + 2.0) .* (A_80 *
+                                               _dust_f_scaling(β, galdust_T, galdust_ν0, ν1) *
+                                               _dust_f_scaling(β, galdust_T, galdust_ν0, ν2))
 
     return Dl_galdust
 end
 
+dust_tt_power_law(ℓs, A_80, α, β, ν1, ν2) = CMBForegrounds.dust_tt_power_law(ℓs, A_80, α, β, ν1, ν2, galdust_T, galdust_ν0; ℓ_pivot=80, T_CMB=T_CMB)
+
 function _CIB_clustering(pow_at_3000, α, β, ν1, ν2, z1, z2, SPT3G_windows_lmax)
 
-        ells = Array{Float64}(1:SPT3G_windows_lmax)
+    ells = Array{Float64}(1:SPT3G_windows_lmax)
 
-        # Calculate and add polarised galactic dust power
-        Dl_cib_clustering =  (ells ./ 3000) .^ α .* (pow_at_3000 *
-        _dust_f_scaling(β, CIB_T, CIB_ν0, ν1) *
-        _dust_f_scaling(β, CIB_T, CIB_ν0, ν2) * sqrt(z1 * z2))
+    # Calculate and add polarised galactic dust power
+    Dl_cib_clustering = (ells ./ 3000) .^ α .* (pow_at_3000 *
+                                                _dust_f_scaling(β, CIB_T, CIB_ν0, ν1) *
+                                                _dust_f_scaling(β, CIB_T, CIB_ν0, ν2) * sqrt(z1 * z2))
 
-        return Dl_cib_clustering
+    return Dl_cib_clustering
 end
+
+cib_clustered_power(ℓs, pow_at_3000, α, β, ν1, ν2, z1, z2) = CMBForegrounds.cib_clustered_power(ℓs, pow_at_3000, α, β, ν1, ν2, z1, z2, CIB_T, CIB_ν0)
 
 function _tSZ_CIB_correlation(ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
     z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, SPT3G_windows_lmax)
 
     # Calculate CIB components
     Dl_cib_clustering_11 = _CIB_clustering(
-    CIB_pow_at_3000, α, β, CIB_ν1, CIB_ν1, z1, z1, SPT3G_windows_lmax)
+        CIB_pow_at_3000, α, β, CIB_ν1, CIB_ν1, z1, z1, SPT3G_windows_lmax)
     Dl_cib_clustering_22 = _CIB_clustering(
         CIB_pow_at_3000, α, β, CIB_ν2, CIB_ν2, z2, z2, SPT3G_windows_lmax)
 
@@ -70,13 +74,16 @@ function _tSZ_CIB_correlation(ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, 
     # Calculate tSZ-CIB correlation
     # Sign defined such that a positive xi corresponds to a reduction at 150GHz
     #TODO: maybe use NaNMath.jl to deal with possible NaNs?
-    """Dl_tSZ_CIB_corr = ( -1 * ξ_tsz_CIB
-            .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
-                sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))"""
 
-    return ( -1 * ξ_tsz_CIB .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
-                                    sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))
+    return (-1 * ξ_tsz_CIB .* (sqrt.(abs.(Dl_tSZ_11 .* Dl_cib_clustering_22)) .+
+                               sqrt.(abs.(Dl_tSZ_22 .* Dl_cib_clustering_11))))
 end
+
+tsz_cib_cross_power(ℓs, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
+    z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2) =
+    CMBForegrounds.tsz_cib_cross_power(ℓs, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
+        z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, tSZ_template, tSZ_ν0, CIB_T, CIB_ν0; ℓ_pivot=3000, T_CMB=T_CMB
+    )
 
 function _tSZ_f_scaling(ν, ν0, T)
     x0 = Ghz_Kelvin * ν0 / T
@@ -89,27 +96,30 @@ function _tSZ_f_scaling(ν, ν0, T)
     return tSZfac / tSZfac0
 end
 
-
 function _tSZ(A_tSZ, ν1, ν2)
 
     # Calculate tSZ power
     Dl_tSZ = tSZ_template .* (A_tSZ *
-    _tSZ_f_scaling(ν1, tSZ_ν0, T_CMB) *
-    _tSZ_f_scaling(ν2, tSZ_ν0, T_CMB))
+                              _tSZ_f_scaling(ν1, tSZ_ν0, T_CMB) *
+                              _tSZ_f_scaling(ν2, tSZ_ν0, T_CMB))
     # Frequency scaling
 
     return Dl_tSZ
 end
 
+tsz_cross_power(A_tSZ, ν1, ν2) = CMBForegrounds.tsz_cross_power(tSZ_template, A_tSZ, ν1, ν2, tSZ_ν0)
+
 function _kSZ(pow_at_3000)
     return pow_at_3000 .* kSZ_template
 end
+
+ksz_template_scaled(pow_at_3000) = CMBForegrounds.ksz_template_scaled(kSZ_template, pow_at_3000)
 
 function _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
     ells = Array(1:SPT3G_windows_lmax)
 
     Cℓ_derivative = Dℓ_theory * 2 * π ./ (ells .* (ells .+ 1))
-    Cℓ_derivative[2:end-1] .= 0.5 .* (Cℓ_derivative[3:end]-Cℓ_derivative[1:end-2])
+    Cℓ_derivative[2:end-1] .= 0.5 .* (Cℓ_derivative[3:end] - Cℓ_derivative[1:end-2])
     Cℓ_derivative[1] = Cℓ_derivative[2]
     Cℓ_derivative[end] = Cℓ_derivative[end-1]
 
@@ -120,12 +130,14 @@ function _supersamplelensing(SPT3G_windows_lmax, κ, Dℓ_theory)
     ells = Array(1:SPT3G_windows_lmax)
 
     Cℓ_derivative = _getCℓ_derivative(SPT3G_windows_lmax, Dℓ_theory)
-    ssl_correction = ells .* Cℓ_derivative  .* ells .* (ells .+ 1) ./ (2π)
+    ssl_correction = ells .* Cℓ_derivative .* ells .* (ells .+ 1) ./ (2π)
     #maybe better to have a get_Dl_derivative?
     ssl_correction .+= 2 .* Dℓ_theory
 
     return ssl_correction .* (-κ)
 end
+
+ssl_response(ls, κ, Dl) = CMBForegrounds.ssl_response(ls, κ, Dl)
 
 function _abberation_correction(SPT3G_windows_lmax, ab_coeff, Dℓ_theory)
     ells = Array(1:SPT3G_windows_lmax)
@@ -147,14 +159,16 @@ end
 function _poisson_power(SPT3G_windows_lmax, pow_at_3000)
     ells = Array(1:SPT3G_windows_lmax)
 
-    return ells .* ells .* (pow_at_3000 / 3000 ^2)
+    return ells .* ells .* (pow_at_3000 / 3000^2)
 end
+
+shot_noise_power(ℓs, pow_at_3000) = CMBForegrounds.shot_noise_power(ℓs, pow_at_3000; ℓ0=3000)
 
 ### implementation proposal
 ### write a function for each of the spectra type
 ### in your likelihood, you are gonna call them several times. Beautiful? Not. But it should work
 
-function TT_foregrounds(D_TT_ν1_ν2, A_80_cirrus, α_cirrus, β_cirrus,
+function TT_foregrounds_old(D_TT_ν1_ν2, A_80_cirrus, α_cirrus, β_cirrus,
     ν1_gc, ν2_gc, A_80_cib, α_cib, β_cib, ν1_cib, ν2_cib, z1, z2, A_tSZ, ν1_tSZ, ν2_tSZ,
     ξ_tsz_CIB, A_kSZ, SPT3G_windows_lmax)###TT_params
     #α_cib fixed to 0.8, we will do it at the likelihood level
@@ -164,17 +178,42 @@ function TT_foregrounds(D_TT_ν1_ν2, A_80_cirrus, α_cirrus, β_cirrus,
     cc = _CIB_clustering(A_80_cib, α_cib, β_cib, ν1_cib, ν2_cib, z1, z2, SPT3G_windows_lmax)
     tsz = _tSZ(A_tSZ, ν1_tSZ, ν2_tSZ)
     tszcib = _tSZ_CIB_correlation(ξ_tsz_CIB, A_tSZ, A_80_cib, α_cib, β_cib,
-    z1, z2, ν1_cib, ν2_cib, ν1_tSZ, ν2_tSZ, SPT3G_windows_lmax)
+        z1, z2, ν1_cib, ν2_cib, ν1_tSZ, ν2_tSZ, SPT3G_windows_lmax)
     ksz = _kSZ(A_kSZ)
-    return pp.+gd.+cc.+tsz.+tszcib.+ksz
+    return pp .+ gd .+ cc .+ tsz .+ tszcib .+ ksz
 end
 
-function TE_foregrounds(A_80_TE, α_TE, β_TE, ν1_te, ν2_te, SPT3G_windows_lmax)###TE_params
+function TT_foregrounds(D_TT_ν1_ν2, A_80_cirrus, α_cirrus, β_cirrus,
+    ν1_gc, ν2_gc, A_80_cib, α_cib, β_cib, ν1_cib, ν2_cib, z1, z2, A_tSZ, ν1_tSZ, ν2_tSZ,
+    ξ_tsz_CIB, A_kSZ, ℓs)###TT_params
+    #α_cib fixed to 0.8, we will do it at the likelihood level
+    #z1, z2 fixed to 1.
+    pp = shot_noise_power(ℓs, D_TT_ν1_ν2)
+    gd = dust_tt_power_law(ℓs, A_80_cirrus, α_cirrus, β_cirrus, ν1_gc, ν2_gc)
+    cc = cib_clustered_power(ℓs, A_80_cib, α_cib, β_cib, ν1_cib, ν2_cib, z1, z2)
+    tsz = tsz_cross_power(A_tSZ, ν1_tSZ, ν2_tSZ)
+    tszcib = tsz_cib_cross_power(ℓs, ξ_tsz_CIB, A_tSZ, A_80_cib, α_cib, β_cib,
+        z1, z2, ν1_cib, ν2_cib, ν1_tSZ, ν2_tSZ)
+    ksz = ksz_template_scaled(A_kSZ)
+    return pp .+ gd .+ cc .+ tsz .+ tszcib .+ ksz
+end
+
+function TE_foregrounds_old(A_80_TE, α_TE, β_TE, ν1_te, ν2_te, SPT3G_windows_lmax)###TE_params
     return _galactic_dust(A_80_TE, α_TE, β_TE, ν1_te, ν2_te, SPT3G_windows_lmax)
 end
 
-function EE_foregrounds(D_EE_ν1_ν2, A_80_EE, α_EE, β_EE, ν1_ee, ν2_ee, SPT3G_windows_lmax)###EE_params
+function TE_foregrounds(A_80_TE, α_TE, β_TE, ν1_te, ν2_te, ℓs)###TE_params
+    return dust_tt_power_law(ℓs, A_80_TE, α_TE, β_TE, ν1_te, ν2_te)
+end
+
+function EE_foregrounds_old(D_EE_ν1_ν2, A_80_EE, α_EE, β_EE, ν1_ee, ν2_ee, SPT3G_windows_lmax)###EE_params
     pp = _poisson_power(SPT3G_windows_lmax, D_EE_ν1_ν2)
     gd = _galactic_dust(A_80_EE, α_EE, β_EE, ν1_ee, ν2_ee, SPT3G_windows_lmax)
-    return pp+gd
+    return pp + gd
+end
+
+function EE_foregrounds(D_EE_ν1_ν2, A_80_EE, α_EE, β_EE, ν1_ee, ν2_ee, ℓs)###EE_params
+    pp = shot_noise_power(ℓs, D_EE_ν1_ν2)
+    gd = dust_tt_power_law(ℓs, A_80_EE, α_EE, β_EE, ν1_ee, ν2_ee)
+    return pp + gd
 end
