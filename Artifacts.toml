@@ -1,3 +1,10 @@
+[SPT3G_D1_TnE_v0]
+git-tree-sha1 = "e166eed00f35ada69a1f5b6ffb12e853704c49c0"
+
+    [[SPT3G_D1_TnE_v0.download]]
+    sha256 = "2eeabff94fc43c3989bbd57a9328dd3ca097fec3e5123b579fec76dbd587ad6d"
+    url = "https://zenodo.org/records/22818351/files/SPT3G_D1_TnE_v0_20260917.tar.xz"
+
 [SPT3G_data]
 git-tree-sha1 = "78941dcede3acc2106f629faa126e9031a1c3fb5"
 

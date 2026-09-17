@@ -6,7 +6,53 @@ version = "0.3.0"
 [deps]
 Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 CMBForegrounds = "fc0df5e6-91e0-40ab-a79d-ad91d7e99724"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+
+[weakdeps]
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+
+[extensions]
+SPTLikelihoodsChainRulesCoreExt = "ChainRulesCore"
+SPTLikelihoodsMooncakeExt = "Mooncake"
+
+# CMBForegrounds is not registered in the General registry. On Julia 1.11+ the
+# [sources] section below resolves it recursively from the pinned v0.4.0 tag, so
+# `Pkg.add(url=...)` of this package works without further steps. Julia 1.10 does
+# not support [sources] and needs the explicit bootstrap documented in README.md
+# and performed by .github/workflows/CI.yml.
+[sources]
+CMBForegrounds = {url = "https://github.com/JuliaCosmologicalLikelihoods/CMBForegrounds.jl", rev = "v0.4.0"}
 
 [compat]
-CMBForegrounds = "0.1.0"
+ADTypes = "1"
+Artifacts = "1"
+BenchmarkTools = "1"
+CMBForegrounds = "0.4"
+ChainRulesCore = "1"
+DelimitedFiles = "1"
+DifferentiationInterface = "0.6, 0.7"
+FiniteDifferences = "0.12"
+ForwardDiff = "0.10, 1"
+LinearAlgebra = "1"
+Mooncake = "0.4, 0.5"
+NPZ = "0.4"
+Pkg = "1"
+Test = "1"
+julia = "1.10"
+
+[extras]
+ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
+FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "ADTypes", "BenchmarkTools", "ChainRulesCore", "DifferentiationInterface", "FiniteDifferences", "ForwardDiff", "Mooncake"]

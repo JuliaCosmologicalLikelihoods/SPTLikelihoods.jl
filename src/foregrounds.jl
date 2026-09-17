@@ -2,15 +2,23 @@ dust_tt_power_law(ℓs, A_80, α, β, ν1, ν2) = CMBForegrounds.dust_tt_power_l
 
 cib_clustered_power(ℓs, pow_at_3000, α, β, ν1, ν2, z1, z2) = CMBForegrounds.cib_clustered_power(ℓs, pow_at_3000, α, β, ν1, ν2, z1, z2, CIB_T, CIB_ν0)
 
-tsz_cib_cross_power(ℓs, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
-    z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2) =
-    CMBForegrounds.tsz_cib_cross_power(ℓs, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
+function tsz_cib_cross_power(ℓs, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
+    z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2)
+    _ensure_legacy_2018_loaded!()
+    return CMBForegrounds.tsz_cib_cross_power(ℓs, ξ_tsz_CIB, tsz_pow_at_3000, CIB_pow_at_3000, α, β,
         z1, z2, CIB_ν1, CIB_ν2, tSZ_ν1, tSZ_ν2, 0.0, tSZ_template, tSZ_ν0, CIB_T, CIB_ν0; ℓ_pivot_cib=3000, ℓ_pivot_tsz=3000, T_CMB=T_CMB
     )
+end
 
-tsz_cross_power(A_tSZ, ν1, ν2, ℓs) = CMBForegrounds.tsz_cross_power(tSZ_template, A_tSZ, ν1, ν2, tSZ_ν0, 0.0, 1.0, ℓs)
+function tsz_cross_power(A_tSZ, ν1, ν2, ℓs)
+    _ensure_legacy_2018_loaded!()
+    return CMBForegrounds.tsz_cross_power(tSZ_template, A_tSZ, ν1, ν2, tSZ_ν0, 0.0, 1.0, ℓs)
+end
 
-ksz_template_scaled(pow_at_3000) = CMBForegrounds.ksz_template_scaled(kSZ_template, pow_at_3000)
+function ksz_template_scaled(pow_at_3000)
+    _ensure_legacy_2018_loaded!()
+    return CMBForegrounds.ksz_template_scaled(kSZ_template, pow_at_3000)
+end
 
 ssl_response(ls, κ, Dl) = CMBForegrounds.ssl_response(ls, κ, Dl)
 

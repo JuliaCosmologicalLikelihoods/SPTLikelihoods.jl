@@ -4,7 +4,7 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
     A_80_cirrus, α_cirrus, β_cirrus, A_80_cib, α_cib, β_cib, A_tSZ, ξ_tsz_CIB,#8+13=21-1=20 since α_cib_fixed
     A_kSZ, A_80_EE, α_EE, β_EE, A_80_TE, α_TE, β_TE,#7+20=27
     cal_T_90, cal_T_150, cal_T_220, cal_E_90, cal_E_150, cal_E_220, ℓs)#27+6=33
-
+    _ensure_legacy_2018_loaded!()
     ssl_TT = ssl_response(ℓs, κ, DL_TT)
     ssl_TE = ssl_response(ℓs, κ, DL_TE)
     ssl_EE = ssl_response(ℓs, κ, DL_EE)
@@ -79,6 +79,7 @@ function compute_theory(DL_TT, DL_TE, DL_EE, κ,#1
 end
 
 function slice_theory(model_matrix)
+    _ensure_legacy_2018_loaded!()
     residuals = bandpowers .- model_matrix
     vec_residuals = vcat([residuals[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
 
@@ -86,7 +87,16 @@ function slice_theory(model_matrix)
 end
 
 function compute_cov(model_matrix)
+    _ensure_legacy_2018_loaded!()
     dbs = vcat([model_matrix[i, spec_bin_min[i]:spec_bin_max[i]] for i in 1:18]...)
     Σ = cov .+ beam_cov .* kron(dbs, dbs')
     return Σ
+end
+
+@inline function _grids_match(a::AbstractVector, b::AbstractVector)
+    length(a) == length(b) || return false
+    @inbounds for i in eachindex(a)
+        a[i] == b[i] || return false
+    end
+    return true
 end

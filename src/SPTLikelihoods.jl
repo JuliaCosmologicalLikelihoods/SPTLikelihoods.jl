@@ -1,9 +1,17 @@
 module SPTLikelihoods
 import Base.@kwdef
 using Artifacts
-using CMBForegrounds: CMBForegrounds
+using LinearAlgebra
+using CMBForegrounds: CMBForegrounds, window_convolution, correlation_power, GeometricMeanCorrelation,
+    PowerLawShape, angular_power
 using NPZ
+using DelimitedFiles
 
+export SPT3GD1Data, load_spt3g_d1_data, SPT3GD1Likelihood, bin_theory, chi2, loglikelihood
+export SPT3GD1CMBTheory, SPT3GD1ForegroundModel, SPT3GD1Parameters, SPT3G_D1_PARAMETER_NAMES, SPT3G_D1_FIDUCIAL_PARAMETERS, foreground_stages
+export instrument_stages, predict
+export prior_penalty, prior_chi2, logprior, logposterior
+export compute_theory, slice_theory, compute_cov
 
 const tSZ_template = Vector{Float64}(undef, 3200)
 const kSZ_template = Vector{Float64}(undef, 3200)
@@ -15,9 +23,10 @@ const effective_band_centres = Matrix{Float64}(undef, 5, 3)
 const fid_cov = Matrix{Float64}(undef, 768, 768)
 const cov = Matrix{Float64}(undef, 728, 728)
 
-function __init__()
-    #check : lmax=3200?
+const _legacy_2018_loaded = Ref(false)
 
+function _ensure_legacy_2018_loaded!()
+    _legacy_2018_loaded[] && return
     tSZ_template .= npzread(joinpath(artifact"SPT3G_data",
         "tSZ_Dl_shaw10_153ghz_norm1.npy"))[1:3200, 2]
     kSZ_template .= npzread(joinpath(artifact"SPT3G_data",
@@ -37,12 +46,18 @@ function __init__()
         "SPT3G_2018_TTTEEE_fiducial_covariance.npy"))
     cov .= npzread(joinpath(artifact"SPT3G_data",
         "bp_cov_posdef.npy"))
-
+    _legacy_2018_loaded[] = true
+    return
 end
 
 
 include("foregrounds.jl")
 include("utils.jl")
+include("spt3g_d1_data.jl")
+include("spt3g_d1_likelihood.jl")
+include("spt3g_d1_foregrounds.jl")
+include("spt3g_d1_instrument.jl")
+include("spt3g_d1_priors.jl")
 
 # Physical constants
 const T_CMB = 2.72548  # CMB temperature
