@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags: ['*']
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1.10'
+          - '1.11'
+          - '1.12'
+        os:
+          - ubuntu-latest
+        arch:
+          - x64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      # Cache is a speed optimisation only. Every step below works from cold:
+      # the dependency is fetched from its pinned tag and the D1 artifact is
+      # downloaded from Zenodo, so a cache miss cannot change the result.
+      - uses: julia-actions/cache@v2
+
+      # CMBForegrounds is not in the General registry. Julia 1.11+ resolves it
+      # recursively from the [sources] entry in Project.toml, pinned to v0.4.0.
+      # Julia 1.10 has no [sources] support and ignores that section, so the same
+      # pinned tag is installed explicitly here. No branch is ever tracked.
+      - name: Bootstrap pinned CMBForegrounds (Julia 1.10 only)
+        if: matrix.version == '1.10'
+        run: |
+          julia --project=. -e '
+            using Pkg
+            Pkg.add(PackageSpec(
+              url="https://github.com/JuliaCosmologicalLikelihoods/CMBForegrounds.jl",
+              rev="v0.4.0",
+            ))'
+
+      - uses: julia-actions/julia-buildpkg@v1
+
+      # Record where CMBForegrounds actually came from, so a run's log proves the
+      # resolution path rather than asserting it.
+      - name: Show resolved CMBForegrounds source
+        run: julia --project=. -e 'using Pkg; Pkg.status("CMBForegrounds"; mode=Pkg.PKGMODE_MANIFEST)'
+
+      # Exercise the public artifact-backed constructors with only the package's
+      # own dependencies, outside the test environment. This downloads the D1
+      # artifact from Zenodo and fails loudly if the binding or Zenodo record is
+      # wrong, independently of the test suite.
+      - name: Artifact-backed public constructors
+        run: |
+          julia --project=. -e '
+            using SPTLikelihoods
+            like = SPT3GD1Likelihood()
+            model = SPT3GD1ForegroundModel()
+            @assert length(like.data.data_vector) == 1392
+            @assert length(like.data.windows) == 21
+            @assert model.ells == collect(2:4095)
+            println("artifact-backed constructors OK")'
+
+      # The full suite, unconditional. The ChainRulesCore and Mooncake extension
+      # tests, the artifact-backed public path, and the 43-parameter AD tests all
+      # run here; nothing is gated behind an environment variable.
+      - uses: julia-actions/julia-runtest@v1

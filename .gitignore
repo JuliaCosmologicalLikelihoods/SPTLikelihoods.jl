@@ -27,3 +27,10 @@ Manifest.toml
 *.dat
 *.npy
 *.txt
+*.npz
+
+# Allow text fixtures in test/fixtures
+!test/fixtures/**
+
+# Converted local runtime artifacts
+validation/converted_artifact/

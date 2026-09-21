@@ -1,0 +1,15 @@
+[deps]
+ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+SPTLikelihoods = "843b1235-59c8-469d-b900-1f4e1bdb4f86"
+
+# Benchmarks run against this working tree. On Julia 1.11+ the package's own
+# [sources] entry then supplies the pinned CMBForegrounds v0.4.0 recursively.
+[sources]
+SPTLikelihoods = {path = ".."}
