@@ -6,8 +6,13 @@ using CMBForegrounds: CMBForegrounds, window_convolution, correlation_power, Geo
     PowerLawShape, angular_power
 using NPZ
 using DelimitedFiles
+# `loglikelihood` and `predict` are extended from StatsAPI rather than defined
+# here. Distributions, StatsBase, DynamicPPL and Turing all extend that same
+# binding, so defining rival ones makes `using SPTLikelihoods, Turing`
+# ambiguous. StatsAPI has no dependencies of its own.
+import StatsAPI: loglikelihood, predict
 
-export SPT3GD1Data, load_spt3g_d1_data, SPT3GD1Likelihood, bin_theory, chi2, loglikelihood
+export SPT3GD1Data, load_spt3g_d1_data, SPT3GD1Likelihood, bin_theory, chi2, loglikelihood, gaussian_normalization
 export SPT3GD1CMBTheory, SPT3GD1ForegroundModel, SPT3GD1Parameters, SPT3G_D1_PARAMETER_NAMES, SPT3G_D1_FIDUCIAL_PARAMETERS, foreground_stages
 export instrument_stages, predict
 export prior_penalty, prior_chi2, logprior, logposterior

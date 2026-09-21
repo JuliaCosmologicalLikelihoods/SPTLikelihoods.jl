@@ -71,3 +71,19 @@ loglikelihood(like::SPT3GD1Likelihood, model_bandpowers::AbstractVector) =
 
 loglikelihood(like::SPT3GD1Likelihood, unbinned_Dls::AbstractVector, ::Val{:unbinned}) =
     -chi2(like, unbinned_Dls, Val(:unbinned)) / 2
+
+"""
+    gaussian_normalization(like)
+
+The parameter-independent Gaussian constant `-N/2·log(2π) - ½·logdet Σ`.
+
+[`loglikelihood`](@ref) deliberately excludes it and returns `-χ²/2` only. Add
+this to recover a normalized log density; the Turing extension does.
+
+Unlike the sibling likelihood packages, this one keeps the Cholesky factor of
+the covariance rather than storing an inverse, so `logdet Σ` is a pass over the
+factor's diagonal and costs nothing. Nothing here has to be traded away to get
+a normalized density.
+"""
+gaussian_normalization(like::SPT3GD1Likelihood) =
+    -length(like.data.data_vector) / 2 * log(2 * pi) - logdet(like.data.cov_chol) / 2
